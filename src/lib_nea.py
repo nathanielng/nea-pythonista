@@ -44,10 +44,44 @@ def d_pprint(d):
     return json.dumps(d, indent=2, ensure_ascii=False)
 
 
+# ----- Parsers -----
+def parse_areametadata(area_metadata):
+    d = {}
+    for area in area_metadata: 
+        name = area['name']
+        x = area['label_location']
+        d[name] = [x['latitude'], x['longitude']]
+    return d
+
+
+def parse_forecasts(forecasts):
+    d = {}
+    for forecast in forecasts:
+        name = forecast['area']
+        x = forecast['forecast']
+        d[name] = x
+    return d
+
+
+def parse_2hr(d):
+    area_metadata = d['area_metadata']
+    area_metadata = parse_areametadata(area_metadata)
+
+    items = d['items'][0]
+    forecasts = items['forecasts']
+    forecasts = parse_forecasts(forecasts)
+
+
+def main(args):
+    d = d_query(args.key)
+    parse_2hr(d)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--key')
+    parser.add_argument('--lat', help='Latitude')
+    parser.add_argument('--lon', help='Longitude')
     args = parser.parse_args()
-    d = d_query(args.key)
-    print(d_pprint(d))
+    main(args)
 
