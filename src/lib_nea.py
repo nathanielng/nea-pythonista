@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import math
 import json
 import requests
 
@@ -70,11 +71,33 @@ def parse_2hr(d):
     items = d['items'][0]
     forecasts = items['forecasts']
     forecasts = parse_forecasts(forecasts)
+    return area_metadata, forecasts
+
+
+# ----- Nearest Location -----
+def get_nearest_location(x, places):
+    min_dist=1e-10
+    for i, place in enumerate(places):
+        name = place['name']
+        label_location = place['label_location']
+        latitude = float(label_location['latitude'])
+        longitude = float(label_location['longitude'])
+        r2 = (x[0] - latitude)**2 + (x[1] - longitude)**2
+        if r2 < min_dist:
+            min_dist = r2
+            min_i = i
+    return places[min_i], math.sqrt(min_dist)
 
 
 def main(args):
     d = d_query(args.key)
-    parse_2hr(d)
+    area_metadata, forecasts = parse_2hr(d)
+    x = [ float(args.lat),
+          float(args.lon) ]
+    place, dist = get_nearest_location(x, d['area_metadata'])
+    x = place['label_location']
+    print(f"Nearest location: {place['name']} ({x['latitude']}, {x['longitude']})")
+    print(f'Distance: {dist}')
 
 
 if __name__ == "__main__":
