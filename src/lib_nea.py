@@ -96,8 +96,10 @@ def main(args):
           float(args.lon) ]
     place, dist = get_nearest_location(x, d['area_metadata'])
     x = place['label_location']
-    print(f"Nearest location: {place['name']} ({x['latitude']}, {x['longitude']})")
+    name = place['name']
+    print(f"Nearest location: {name} ({x['latitude']}, {x['longitude']})")
     print(f'Distance: {dist}')
+    print(f"Weather: {forecasts[name]}")
 
 
 if __name__ == "__main__":
