@@ -41,12 +41,12 @@ def d_query(key):
     return json.loads(t_query(key))
 
 
-def d_pprint(d, print=True):
+def d_pprint(d, verbose=True):
     """
     Pretty prints a dictionary
     """
     txt = json.dumps(d, indent=2, ensure_ascii=False)
-    if print is True:
+    if verbose is True:
         print(txt)
     return txt
 
@@ -109,8 +109,8 @@ def get_nearest_location(x, places):
     return places[min_i], math.sqrt(min_dist)
 
 
-def main(args):
-    d = d_query(args.key)
+def now_cast():
+    d = d_query('2hr')
     area_metadata, forecasts = parse_2hr(d)
     x = [ float(args.lat),
           float(args.lon) ]
@@ -120,6 +120,14 @@ def main(args):
     print(f"Nearest location: {name} ({x['latitude']}, {x['longitude']})")
     print(f'Distance: {dist}')
     print(f"Weather: {forecasts[name]}")
+
+
+def main(args):
+    if args.key == '2hr':
+        now_cast()
+    else:
+        d = d_query(args.key)
+        d_pprint(d)
 
 
 if __name__ == "__main__":
