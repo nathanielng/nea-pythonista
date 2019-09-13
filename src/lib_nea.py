@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import datetime
 import json
 import math
 import requests
@@ -117,14 +118,80 @@ def now_cast():
     place, dist = get_nearest_location(x, d['area_metadata'])
     x = place['label_location']
     name = place['name']
-    print(f"Nearest location: {name} ({x['latitude']}, {x['longitude']})")
-    print(f'Distance: {dist}')
-    print(f"Weather: {forecasts[name]}")
+    txt = f"Nearest location: {name} ({x['latitude']}, {x['longitude']})"
+    txt += f'\nDistance: {dist}'
+    txt += f"\nWeather: {forecasts[name]}"
+
+
+def parse_general_forecast(g):
+    t = g['temperature']
+    rh = g['relative_humidity']
+    wind = g['wind']
+    w_speed = wind['speed']
+
+    txt = f"Forecast: {g['forecast']}"
+    txt += f", {t['low']}-{t['high']} C"
+    txt += f", {rh['low']}-{rh['high']} %RH"
+    txt += f", {w_speed['low']}-{w_speed['high']} {wind['direction']}"
+    return txt
+
+
+def hours_to_timestr(h):
+    if h < 12:
+        return f"{h}am"
+    elif h == 12:
+        return f"{h}pm"
+    else:
+        return f"{h-12}pm"
+
+
+def timediff_to_timestr(t_now, tt):
+    h_now = t_now.hour
+    hh = tt.hour
+    if t_now.day == tt.day:
+        txt = f"Today {hours_to_timestr(h_now)} - {hours_to_timestr(hh)}"
+    elif t_now.day + 1 == tt.day:
+        txt = f"Today {hours_to_timestr(h_now)} - Tomorrow {hours_to_timestr(hh)}"
+    return txt
+
+
+def parse_periods(periods):
+    now = datetime.datetime.now()
+    fmt = "%Y-%m-%dT%H:%M:%S%z"
+    txt = ""
+    for i, p in enumerate(periods):
+        tt = p['time']
+        start = datetime.datetime.strptime(tt['start'], fmt)
+        end = datetime.datetime.strptime(tt['end'], fmt)
+        start_txt = timediff_to_timestr(now, start)
+
+        regions = p['regions']
+        west = regions['west']
+        east = regions['east']
+        central = regions['central']
+        south = regions['south']
+        north = regions['north']        
+        txt += f"{start_txt}: North - {north}, South - {south}, East - {east}, West - {west}\n"
+    return txt.strip()
+
+
+def forecast_24hr():
+    d = d_query('24hr')
+    status = d['api_info']['status']
+    items = d['items'][0]
+    general = items['general']
+    periods = items['periods']
+    txt = parse_general_forecast(general)
+    print(txt)
+    txt = parse_periods(periods)
+    print(txt)
 
 
 def main(args):
     if args.key == '2hr':
-        now_cast()
+        txt = now_cast()
+    elif args.key == '24hr':
+        txt = forecast_24hr()
     else:
         d = d_query(args.key)
         d_pprint(d)
