@@ -52,6 +52,26 @@ def d_pprint(d, verbose=True):
     return txt
 
 
+# ----- Utilities -----
+def hours_to_timestr(h):
+    if h < 12:
+        return f"{h}am"
+    elif h == 12:
+        return f"{h}pm"
+    else:
+        return f"{h-12}pm"
+
+
+def timediff_to_timestr(t_now, tt):
+    h_now = t_now.hour
+    hh = tt.hour
+    if t_now.day == tt.day:
+        txt = f"Today {hours_to_timestr(h_now)} - {hours_to_timestr(hh)}"
+    elif t_now.day + 1 == tt.day:
+        txt = f"Today {hours_to_timestr(h_now)} - Tomorrow {hours_to_timestr(hh)}"
+    return txt
+
+
 # ----- Parsers -----
 def parse_areametadata(area_metadata):
     d = {}
@@ -79,6 +99,39 @@ def parse_2hr(d):
     forecasts = items['forecasts']
     forecasts = parse_forecasts(forecasts)
     return area_metadata, forecasts
+
+
+def parse_general_forecast(g):
+    t = g['temperature']
+    rh = g['relative_humidity']
+    wind = g['wind']
+    w_speed = wind['speed']
+
+    txt = f"24hr: {g['forecast']}"
+    txt += f", {t['low']}-{t['high']} °C"
+    txt += f", {rh['low']}-{rh['high']}% humidity"
+    txt += f", {w_speed['low']}-{w_speed['high']} {wind['direction']}"
+    return txt
+
+
+def parse_periods(periods):
+    now = datetime.datetime.now()
+    fmt = "%Y-%m-%dT%H:%M:%S%z"
+    txt = ""
+    for i, p in enumerate(periods):
+        tt = p['time']
+        start = datetime.datetime.strptime(tt['start'], fmt)
+        end = datetime.datetime.strptime(tt['end'], fmt)
+        start_txt = timediff_to_timestr(now, start)
+
+        regions = p['regions']
+        west = regions['west']
+        east = regions['east']
+        central = regions['central']
+        south = regions['south']
+        north = regions['north']        
+        txt += f"{start_txt}: Central - {central}, North - {north}, South - {south}, East - {east}, West - {west}\n"
+    return txt.strip()
 
 
 # ----- Location Library -----
@@ -110,6 +163,7 @@ def get_nearest_location(x, places):
     return places[min_i], math.sqrt(min_dist)
 
 
+# ----- Forecasts -----
 def now_cast():
     d = d_query('2hr')
     area_metadata, forecasts = parse_2hr(d)
@@ -118,61 +172,8 @@ def now_cast():
     place, dist = get_nearest_location(x, d['area_metadata'])
     x = place['label_location']
     name = place['name']
-    txt = f"Now: {name} ({x['latitude']}, {x['longitude']}): "
-    txt += f"{forecasts[name]}"
+    txt = f"Now: {forecasts[name]} at {name}"
     return txt
-
-
-def parse_general_forecast(g):
-    t = g['temperature']
-    rh = g['relative_humidity']
-    wind = g['wind']
-    w_speed = wind['speed']
-
-    txt = f"24hr Forecast: {g['forecast']}"
-    txt += f", {t['low']}-{t['high']} C"
-    txt += f", {rh['low']}-{rh['high']} %RH"
-    txt += f", {w_speed['low']}-{w_speed['high']} {wind['direction']}"
-    return txt
-
-
-def hours_to_timestr(h):
-    if h < 12:
-        return f"{h}am"
-    elif h == 12:
-        return f"{h}pm"
-    else:
-        return f"{h-12}pm"
-
-
-def timediff_to_timestr(t_now, tt):
-    h_now = t_now.hour
-    hh = tt.hour
-    if t_now.day == tt.day:
-        txt = f"Today {hours_to_timestr(h_now)} - {hours_to_timestr(hh)}"
-    elif t_now.day + 1 == tt.day:
-        txt = f"Today {hours_to_timestr(h_now)} - Tomorrow {hours_to_timestr(hh)}"
-    return txt
-
-
-def parse_periods(periods):
-    now = datetime.datetime.now()
-    fmt = "%Y-%m-%dT%H:%M:%S%z"
-    txt = ""
-    for i, p in enumerate(periods):
-        tt = p['time']
-        start = datetime.datetime.strptime(tt['start'], fmt)
-        end = datetime.datetime.strptime(tt['end'], fmt)
-        start_txt = timediff_to_timestr(now, start)
-
-        regions = p['regions']
-        west = regions['west']
-        east = regions['east']
-        central = regions['central']
-        south = regions['south']
-        north = regions['north']        
-        txt += f"{start_txt}: North - {north}, South - {south}, East - {east}, West - {west}\n"
-    return txt.strip()
 
 
 def forecast_24hr():
@@ -186,6 +187,7 @@ def forecast_24hr():
     return txt
 
 
+# ----- Main -----
 def main(args):
     if args.key == '2hr':
         txt = now_cast()
