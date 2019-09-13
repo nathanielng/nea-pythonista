@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import argparse
-import math
 import json
+import math
 import requests
 
 
@@ -41,8 +41,14 @@ def d_query(key):
     return json.loads(t_query(key))
 
 
-def d_pprint(d):
-    return json.dumps(d, indent=2, ensure_ascii=False)
+def d_pprint(d, print=True):
+    """
+    Pretty prints a dictionary
+    """
+    txt = json.dumps(d, indent=2, ensure_ascii=False)
+    if print is True:
+        print(txt)
+    return txt
 
 
 # ----- Parsers -----
@@ -74,7 +80,21 @@ def parse_2hr(d):
     return area_metadata, forecasts
 
 
-# ----- Nearest Location -----
+# ----- Location Library -----
+def get_location():
+    """
+    Returns the latitude and longitude of the
+    current location
+    """
+    try:
+        import location
+        my_location = location.get_location()
+        return [ my_location['latitude'],
+                 my_location['longitude'] ]
+    except:
+        return None
+
+
 def get_nearest_location(x, places):
     min_dist=1e-10
     for i, place in enumerate(places):
