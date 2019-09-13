@@ -118,9 +118,9 @@ def now_cast():
     place, dist = get_nearest_location(x, d['area_metadata'])
     x = place['label_location']
     name = place['name']
-    txt = f"Nearest location: {name} ({x['latitude']}, {x['longitude']})"
-    txt += f'\nDistance: {dist}'
-    txt += f"\nWeather: {forecasts[name]}"
+    txt = f"Now: {name} ({x['latitude']}, {x['longitude']}): "
+    txt += f"{forecasts[name]}"
+    return txt
 
 
 def parse_general_forecast(g):
@@ -129,7 +129,7 @@ def parse_general_forecast(g):
     wind = g['wind']
     w_speed = wind['speed']
 
-    txt = f"Forecast: {g['forecast']}"
+    txt = f"24hr Forecast: {g['forecast']}"
     txt += f", {t['low']}-{t['high']} C"
     txt += f", {rh['low']}-{rh['high']} %RH"
     txt += f", {w_speed['low']}-{w_speed['high']} {wind['direction']}"
@@ -182,9 +182,8 @@ def forecast_24hr():
     general = items['general']
     periods = items['periods']
     txt = parse_general_forecast(general)
-    print(txt)
-    txt = parse_periods(periods)
-    print(txt)
+    txt += "\n" + parse_periods(periods)
+    return txt
 
 
 def main(args):
@@ -195,6 +194,7 @@ def main(args):
     else:
         d = d_query(args.key)
         d_pprint(d)
+    print(txt)
 
 
 if __name__ == "__main__":
