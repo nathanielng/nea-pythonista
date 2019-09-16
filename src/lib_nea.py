@@ -114,6 +114,37 @@ def parse_general_forecast(g):
     return txt
 
 
+def parse_readings(d):
+    region_metadata = d['region_metadata']    
+    items = d['items'][0]
+    return region_metadata, items['readings']
+
+
+def parse_pm25(d):
+    region_metadata, readings = \
+        parse_readings(d)
+    return region_metadata, readings['pm25_one_hourly']
+
+
+def parse_psi(d):
+    region_metadata, readings = \
+        parse_readings(d)
+    return region_metadata, readings
+
+
+def parse_general_forecast(g):
+    t = g['temperature']
+    rh = g['relative_humidity']
+    wind = g['wind']
+    w_speed = wind['speed']
+
+    txt = f"24hr Forecast: {g['forecast']}"
+    txt += f", {t['low']}-{t['high']} °C"
+    txt += f", {rh['low']}-{rh['high']} %RH"
+    txt += f", {w_speed['low']}-{w_speed['high']} {wind['direction']}"
+    return txt
+
+
 def parse_periods(periods):
     now = datetime.datetime.now()
     fmt = "%Y-%m-%dT%H:%M:%S%z"
@@ -184,6 +215,47 @@ def forecast_24hr():
     periods = items['periods']
     txt = parse_general_forecast(general)
     txt += "\n" + parse_periods(periods)
+    return txt
+
+
+def forecast_pm25():
+    d = d_query('pm25')
+    region_metadata, pm25 = parse_pm25(d)
+    x = get_location()
+    place, dist = get_nearest_location(x, region_metadata)
+    name = place['name']
+    x = place['label_location']
+    txt = f"PM2.5: {pm25[name]} (location = {name})"
+    return txt
+
+
+def forecast_psi():
+    d = d_query('psi')
+    region_metadata, readings = parse_psi(d)
+    x = get_location()
+    place, dist = get_nearest_location(x, region_metadata)
+    name = place['name']
+    x = place['label_location']
+    
+    o3_sub_index = readings['o3_sub_index']
+    pm10_twenty_four_hourly = readings['pm10_twenty_four_hourly']
+    pm10_sub_index = readings['pm10_sub_index']
+    co_sub_index = readings['co_sub_index']
+    pm25_twenty_four_hourly = readings['pm25_twenty_four_hourly']
+    so2_sub_index = readings['so2_sub_index']
+    co_eight_hour_max = readings['co_eight_hour_max']
+    no2_one_hour_max = readings['no2_one_hour_max']
+    so2_twenty_four_hourly = readings['so2_twenty_four_hourly']
+    pm25_sub_index = readings['pm25_sub_index']
+    psi_twenty_four_hourly = readings['psi_twenty_four_hourly']
+    o3_eight_hour_max = readings['o3_eight_hour_max']
+    txt = f"PSI: {psi_twenty_four_hourly[name]} (24hr)"
+    txt += f", PM2.5: {pm25_twenty_four_hourly[name]} (24hr) {pm25_sub_index[name]} (sub-index)"
+    txt += f", PM10: {pm10_twenty_four_hourly[name]} (24hr) {pm10_sub_index[name]} (sub-index)"
+    txt += f", SO2: {so2_twenty_four_hourly[name]} (24hr) {so2_sub_index[name]} (sub-index)"
+    txt += f", O3: {o3_sub_index[name]} (sub-index) {o3_eight_hour_max[name]} (8hr max)"
+    txt += f", NO2: {no2_one_hour_max[name]} (1 hr max)"
+    txt += f", CO: {co_sub_index[name]} (sub-index) {co_eight_hour_max[name]} (8 hr max)"
     return txt
 
 
