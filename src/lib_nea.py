@@ -25,6 +25,9 @@ urls = {
     'uv': 'https://api.data.gov.sg/v1/environment/uv-index'
 }
 
+LATITUDE = None
+LONGITUDE = None
+
 
 # ----- API Query Library -----
 def t_query(key):
@@ -164,7 +167,7 @@ def get_location():
         return [ my_location['latitude'],
                  my_location['longitude'] ]
     except:
-        return None
+        return [ LATITUDE, LONGITUDE ]
 
 
 def get_nearest_location(x, places):
@@ -257,6 +260,10 @@ def main(args):
         txt = now_cast()
     elif args.key == '24hr':
         txt = forecast_24hr()
+    elif args.key == 'pm25':
+        txt = forecast_pm25()
+    elif args.key == 'psi':
+        txt = forecast_psi()
     else:
         d = d_query(args.key)
         d_pprint(d)
@@ -268,6 +275,8 @@ if __name__ == "__main__":
     parser.add_argument('--key')
     parser.add_argument('--lat', help='Latitude')
     parser.add_argument('--lon', help='Longitude')
+    LATITUDE = float(args.lat)
+    LONGITUDE = float(args.lon)
     args = parser.parse_args()
     main(args)
 
