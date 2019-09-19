@@ -101,19 +101,6 @@ def parse_2hr(d):
     return area_metadata, forecasts
 
 
-def parse_general_forecast(g):
-    t = g['temperature']
-    rh = g['relative_humidity']
-    wind = g['wind']
-    w_speed = wind['speed']
-
-    txt = f"24hr: {g['forecast']}"
-    txt += f", {t['low']}-{t['high']} °C"
-    txt += f", {rh['low']}-{rh['high']}% humidity"
-    txt += f", {w_speed['low']}-{w_speed['high']} {wind['direction']}"
-    return txt
-
-
 def parse_readings(d):
     region_metadata = d['region_metadata']    
     items = d['items'][0]
@@ -181,6 +168,11 @@ def get_location():
 
 
 def get_nearest_location(x, places):
+    """
+    Given a location `x`, and a list of locations, `places`,
+    returns the list index corresponding to the minimum distance,
+    and the minimum distance.
+    """
     min_dist=1e-10
     for i, place in enumerate(places):
         name = place['name']
