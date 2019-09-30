@@ -176,7 +176,7 @@ def get_nearest_location(x, places):
     returns the list index corresponding to the minimum distance,
     and the minimum distance.
     """
-    min_dist=1e-10
+    min_dist=1e10
     for i, place in enumerate(places):
         name = place['name']
         label_location = place['label_location']
@@ -275,8 +275,9 @@ if __name__ == "__main__":
     parser.add_argument('--key')
     parser.add_argument('--lat', help='Latitude')
     parser.add_argument('--lon', help='Longitude')
+    args = parser.parse_args()
+
     LATITUDE = float(args.lat)
     LONGITUDE = float(args.lon)
-    args = parser.parse_args()
     main(args)
 
