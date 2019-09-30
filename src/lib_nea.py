@@ -6,6 +6,8 @@ import json
 import math
 import requests
 
+from pytz import timezone
+
 
 try:
     import console
@@ -69,9 +71,9 @@ def timediff_to_timestr(t_now, tt):
     h_now = t_now.hour
     hh = tt.hour
     if t_now.day == tt.day:
-        txt = f"Today {hours_to_timestr(h_now)} - {hours_to_timestr(hh)}"
-    elif t_now.day + 1 == tt.day:
-        txt = f"Today {hours_to_timestr(h_now)} - Tomorrow {hours_to_timestr(hh)}"
+        txt = f"Today {hours_to_timestr(hh)}"
+    else:
+        txt = f"Tomorrow {hours_to_timestr(hh)}"
     return txt
 
 
@@ -136,14 +138,15 @@ def parse_general_forecast(g):
 
 
 def parse_periods(periods):
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(timezone('Singapore'))
     fmt = "%Y-%m-%dT%H:%M:%S%z"
     txt = ""
     for i, p in enumerate(periods):
         tt = p['time']
         start = datetime.datetime.strptime(tt['start'], fmt)
         end = datetime.datetime.strptime(tt['end'], fmt)
-        start_txt = timediff_to_timestr(now, start)
+        start_txt = timediff_to_timestr(now, start) + " - " + \
+            timediff_to_timestr(now, end)
 
         regions = p['regions']
         west = regions['west']
