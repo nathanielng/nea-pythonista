@@ -5,6 +5,7 @@ import datetime
 import json
 import math
 import requests
+import urllib.parse
 
 from pytz import timezone
 
@@ -32,11 +33,16 @@ LONGITUDE = None
 
 
 # ----- API Query Library -----
+def parse_quote(url):
+    return urllib.parse.quote(url)
+
+
 def t_query(key):
     """
     Returns the raw text from a query
     """
-    resp = requests.get(urls[key])
+    url = urls[key]
+    resp = requests.get(url)
     return resp.text
 
 
@@ -101,6 +107,7 @@ def parse_2hr(d):
     area_metadata = parse_areametadata(area_metadata)
 
     items = d['items'][0]
+
     forecasts = items['forecasts']
     forecasts = parse_forecasts(forecasts)
     return area_metadata, forecasts
