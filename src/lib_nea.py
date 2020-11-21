@@ -242,6 +242,23 @@ def forecast_psi():
     name = place['name']
     x = place['label_location']
     
+    pm10_twenty_four_hourly = readings['pm10_twenty_four_hourly']
+    pm25_twenty_four_hourly = readings['pm25_twenty_four_hourly']
+    psi_twenty_four_hourly = readings['psi_twenty_four_hourly']
+    txt = f"PSI 24hr: {psi_twenty_four_hourly[name]} (PSI)"
+    txt += f", {pm25_twenty_four_hourly[name]} (PM2.5)"
+    txt += f", {pm10_twenty_four_hourly[name]} (PM10)"
+    return txt
+
+
+def forecast_psi_all():
+    d = d_query('psi')
+    region_metadata, readings = parse_psi(d)
+    x = get_location()
+    place, dist = get_nearest_location(x, region_metadata)
+    name = place['name']
+    x = place['label_location'] 
+
     o3_sub_index = readings['o3_sub_index']
     pm10_twenty_four_hourly = readings['pm10_twenty_four_hourly']
     pm10_sub_index = readings['pm10_sub_index']
