@@ -11,6 +11,7 @@ from pytz import timezone
 
 
 try:
+    import ui
     import console
     console.clear()
     ios_pythonista = True
@@ -144,14 +145,23 @@ def parse_general_forecast(g):
     return txt
 
 
+def remove_timezone_colon(d):
+    if d[-3:-2] == ':':
+        return d[:-3] + d[-2:]
+    else:
+        return d
+
+
 def parse_periods(periods):
     now = datetime.datetime.now(timezone('Singapore'))
     fmt = "%Y-%m-%dT%H:%M:%S%z"
     txt = ""
     for i, p in enumerate(periods):
         tt = p['time']
-        start = datetime.datetime.strptime(tt['start'], fmt)
-        end = datetime.datetime.strptime(tt['end'], fmt)
+        tts = remove_timezone_colon(tt['start'])
+        tte = remove_timezone_colon(tt['end'])
+        start = datetime.datetime.strptime(tts, fmt)
+        end = datetime.datetime.strptime(tte, fmt)
         start_txt = timediff_to_timestr(now, start) + " - " + \
             timediff_to_timestr(now, end)
 
@@ -203,8 +213,8 @@ def get_nearest_location(x, places):
 def now_cast():
     d = d_query('2hr')
     area_metadata, forecasts = parse_2hr(d)
-    x = [ float(args.lat),
-          float(args.lon) ]
+    x = [ float(LATITUDE),
+          float(LONGITUDE) ]
     place, dist = get_nearest_location(x, d['area_metadata'])
     x = place['label_location']
     name = place['name']
@@ -306,5 +316,23 @@ if __name__ == "__main__":
 
     LATITUDE = float(args.lat)
     LONGITUDE = float(args.lon)
-    main(args)
 
+    try:
+        x = get_location()
+        if x is not NONE:
+            LATITUDE = x[0]
+            LONGITUDE = x[1]
+    except:
+        pass
+
+    weather_txt = now_cast()
+    weather_txt += '\n\n' + forecast_24hr()
+
+    v = ui.load_view()
+    v['label1'].text = weather_txt
+
+    try:
+        v.present('sheet')
+    except:
+        import appex
+        appex.set_widget_view(v)
