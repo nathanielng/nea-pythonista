@@ -78,9 +78,11 @@ def timediff_to_timestr(t_now, tt):
     h_now = t_now.hour
     hh = tt.hour
     if t_now.day == tt.day:
-        txt = f"Today {hours_to_timestr(hh)}"
+        # Today
+        txt = f"{hours_to_timestr(hh)}"
     else:
-        txt = f"Tomorrow {hours_to_timestr(hh)}"
+        # Tomorrow
+        txt = f"{hours_to_timestr(hh)}"
     return txt
 
 
@@ -139,8 +141,8 @@ def parse_general_forecast(g):
     w_speed = wind['speed']
 
     txt = f"24hr Forecast: {g['forecast']}"
-    txt += f", {t['low']}-{t['high']} °C"
-    txt += f", {rh['low']}-{rh['high']} %RH"
+    txt += f", {t['low']}-{t['high']}°C"
+    txt += f", {rh['low']}-{rh['high']}%RH"
     txt += f", {w_speed['low']}-{w_speed['high']} {wind['direction']}"
     return txt
 
@@ -152,10 +154,11 @@ def remove_timezone_colon(d):
         return d
 
 
-def parse_periods(periods):
+def parse_periods(periods, by_period=True):
     now = datetime.datetime.now(timezone('Singapore'))
     fmt = "%Y-%m-%dT%H:%M:%S%z"
     txt = ""
+    central_txt, north_txt, south_txt, east_txt, west_txt = '[Central]', '[North]', '[South]', '[East]', '[West]'
     for i, p in enumerate(periods):
         tt = p['time']
         tts = remove_timezone_colon(tt['start'])
@@ -170,9 +173,19 @@ def parse_periods(periods):
         east = regions['east']
         central = regions['central']
         south = regions['south']
-        north = regions['north']        
-        txt += f"{start_txt}: Central - {central}, North - {north}, South - {south}, East - {east}, West - {west}\n"
-    return txt.strip()
+        north = regions['north']
+        if by_period:
+            txt += f"{start_txt}: Central - {central}, North - {north}, South - {south}, East - {east}, West - {west}\n"
+        else:
+            central_txt += f' {central} ({start_txt})'
+            north_txt += f' {north} ({start_txt})'
+            south_txt += f' {south} ({start_txt})'
+            east_txt += f' {east} ({start_txt})'
+            west_txt += f' {west} ({start_txt})'
+    if by_period:
+        return txt.strip()
+    else:
+        return f'{central_txt}\n{north_txt}\n{south_txt}\n{east_txt}\n{west_txt}'
 
 
 # ----- Location Library -----
@@ -229,7 +242,7 @@ def forecast_24hr():
     general = items['general']
     periods = items['periods']
     txt = parse_general_forecast(general)
-    txt += "\n" + parse_periods(periods)
+    txt += "\n" + parse_periods(periods, by_period=False)
     return txt
 
 
@@ -310,8 +323,8 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--key')
-    parser.add_argument('--lat', help='Latitude')
-    parser.add_argument('--lon', help='Longitude')
+    parser.add_argument('--lat', default=1.290270, help='Latitude')
+    parser.add_argument('--lon', default=103.851959, help='Longitude')
     args = parser.parse_args()
 
     LATITUDE = float(args.lat)
@@ -326,7 +339,7 @@ if __name__ == "__main__":
         pass
 
     weather_txt = now_cast()
-    weather_txt += '\n\n' + forecast_24hr()
+    weather_txt += '\n' + forecast_24hr()
 
     v = ui.load_view()
     v['label1'].text = weather_txt
