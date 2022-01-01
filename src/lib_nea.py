@@ -5,6 +5,7 @@ import datetime
 import json
 import math
 import requests
+import re
 import urllib.parse
 
 from pytz import timezone
@@ -66,7 +67,9 @@ def d_pprint(d, verbose=True):
 
 # ----- Utilities -----
 def hours_to_timestr(h):
-    if h < 12:
+    if h == 0:
+        return "12am"
+    elif h < 12:
         return f"{h}am"
     elif h == 12:
         return f"{h}pm"
@@ -110,10 +113,14 @@ def parse_2hr(d):
     area_metadata = parse_areametadata(area_metadata)
 
     items = d['items'][0]
-
-    forecasts = items['forecasts']
-    forecasts = parse_forecasts(forecasts)
-    return area_metadata, forecasts
+    
+    try:
+        forecasts = items['forecasts']
+        forecasts = parse_forecasts(forecasts)
+        return area_metadata, forecasts
+    except:
+        print(f'Error: No "forecasts" key in items={items}')
+        return area_metadata, 'no forecast'
 
 
 def parse_readings(d):
@@ -152,6 +159,10 @@ def remove_timezone_colon(d):
         return d[:-3] + d[-2:]
     else:
         return d
+
+
+def emojify(x):
+    x = re.sub('Thundery Showers', '⛈')
 
 
 def parse_periods(periods, by_period=True):
@@ -209,7 +220,7 @@ def get_nearest_location(x, places):
     returns the list index corresponding to the minimum distance,
     and the minimum distance.
     """
-    min_dist=1e10
+    min_dist, min_i = 1e10, 0
     for i, place in enumerate(places):
         name = place['name']
         label_location = place['label_location']
@@ -225,9 +236,15 @@ def get_nearest_location(x, places):
 # ----- Forecasts -----
 def now_cast():
     d = d_query('2hr')
+    print(d['items'][0])
+    if len(d['items'][0]) == 0:
+        print(f'2 hour query returns: {d}')
+        return 'Now: no forecast'
+    
     area_metadata, forecasts = parse_2hr(d)
     x = [ float(LATITUDE),
           float(LONGITUDE) ]
+    
     place, dist = get_nearest_location(x, d['area_metadata'])
     x = place['label_location']
     name = place['name']
