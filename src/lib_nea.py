@@ -142,12 +142,13 @@ def parse_psi(d):
 
 
 def parse_general_forecast(g):
+    forecast = emojify(g['forecast'])
     t = g['temperature']
     rh = g['relative_humidity']
     wind = g['wind']
     w_speed = wind['speed']
 
-    txt = f"24hr Forecast: {g['forecast']}"
+    txt = f"24hr Forecast: {forecast}"
     txt += f", {t['low']}-{t['high']}°C"
     txt += f", {rh['low']}-{rh['high']}%RH"
     txt += f", {w_speed['low']}-{w_speed['high']} {wind['direction']}"
@@ -162,7 +163,11 @@ def remove_timezone_colon(d):
 
 
 def emojify(x):
-    x = re.sub('Thundery Showers', '⛈')
+    x = re.sub('Thundery Showers', '⛈', x)
+    x = re.sub('Cloudy', '☁️', x)
+    x = re.sub('Fair', '🌤', x)
+    x = re.sub('Windy', '💨', x)
+    return x
 
 
 def parse_periods(periods, by_period=True):
@@ -180,11 +185,11 @@ def parse_periods(periods, by_period=True):
             timediff_to_timestr(now, end)
 
         regions = p['regions']
-        west = regions['west']
-        east = regions['east']
-        central = regions['central']
-        south = regions['south']
-        north = regions['north']
+        west = emojify(regions['west'])
+        east = emojify(regions['east'])
+        central = emojify(regions['central'])
+        south = emojify(regions['south'])
+        north = emojify(regions['north'])
         if by_period:
             txt += f"{start_txt}: Central - {central}, North - {north}, South - {south}, East - {east}, West - {west}\n"
         else:
@@ -248,7 +253,8 @@ def now_cast():
     place, dist = get_nearest_location(x, d['area_metadata'])
     x = place['label_location']
     name = place['name']
-    txt = f"Now: {forecasts[name]} at {name}"
+    nowcast = emojify(forecasts[name])
+    txt = f"Now: {nowcast} at {name}"
     return txt
 
 
