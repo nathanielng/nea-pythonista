@@ -241,7 +241,7 @@ def get_nearest_location(x, places):
 # ----- Forecasts -----
 def now_cast():
     d = d_query('2hr')
-    print(d['items'][0])
+    # print(d['items'][0])
     if len(d['items'][0]) == 0:
         print(f'2 hour query returns: {d}')
         return 'Now: no forecast'
@@ -364,11 +364,12 @@ if __name__ == "__main__":
     weather_txt = now_cast()
     weather_txt += '\n' + forecast_24hr()
 
-    v = ui.load_view()
-    v['label1'].text = weather_txt
-
     try:
+        v = ui.load_view()
+        v['label1'].text = weather_txt
         v.present('sheet')
-    except:
+
         import appex
         appex.set_widget_view(v)
+    except:
+        print(weather_txt)
