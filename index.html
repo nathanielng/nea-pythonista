@@ -1,26 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Singapore Weather</title>
   <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/dist/styles/ag-grid.css">
   <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/dist/styles/ag-theme-balham.css">
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+
+  <style>
+    body {
+      text-align: center;
+      background: rgb(249, 249, 248);
+      color: rgb(16, 19, 2);
+      font-family: helvetica;
+    }
+    #data-table {
+      height: 400px;
+      width: 100%;
+    }
+  </style>  
 </head>
 
 <body>
-
-<style>
-  #data-table {
-    height: 400px;
-    width: 100%;
-  }
-</style>
-
-
-<h3>Singapore 2-hr Forecast</h3>
+<div class="c1" align="center">
+  <h3>Singapore 2-hr Forecast</h3>
+</div>
+  
 
 <div id="data-table" class="ag-theme-balham">
 </div>
@@ -38,7 +45,8 @@
       filter: 'agTextColumnFilter',
       resizable: true
     },
-    pagination: true,
+    columnHoverHighlight: false,
+    pagination: false,
     columnDefs: columnDefs,
     onGridReady: (event) => { renderDataInTheTable(event.api) }
   };
@@ -55,9 +63,9 @@
       locations = data['area_metadata'];
       items = data['items'];
       forecasts = items[0]['forecasts'];
-      console.log(forecasts);
       api.setRowData(forecasts);
       api.sizeColumnsToFit();
+      console.log(data);
     })
   }
 </script>
