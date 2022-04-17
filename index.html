@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Singapore Weather</title>
+  <script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/dist/styles/ag-grid.css">
+  <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/dist/styles/ag-theme-balham.css">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+</head>
+
+<!--
+Learn to code:
+1. https://dash.generalassemb.ly/projects/annas-website-1
+2. https://www.freecodecamp.org/news/convert-html-table-to-dynamic-javascript-data-grid/
+   Documentation: https://www.ag-grid.com/javascript-data-grid/getting-started/
+3. Alternatives: https://www.freecodecamp.org/news/how-to-integrate-material-ui-data-grid-in-react-using-data-from-a-rest-api/
+   https://blog.ag-grid.com/react-get-started-with-react-grid-in-5-minutes/
+
+Best HTML editors for iOS in 2019:  Coda & Textastic
+1. https://www.lifewire.com/html-editors-for-ipad-3468812
+2. https://www.igeeksblog.com/best-ipad-html-editor-apps/
+-->
+
+<body>
+
+<style>
+  #data-table {
+    height: 400px;
+    width: 100%;
+  }
+</style>
+
+
+<h3>Singapore 2-hr Forecast</h3>
+
+<div id="data-table" class="ag-theme-balham">
+</div>
+
+<script type="text/javascript" charset="utf-8">
+
+  const columnDefs = [
+    { field: 'area' },
+    { field: 'forecast' },
+  ];
+
+  const gridOptions = {
+    defaultColDef: {
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      resizable: true
+    },
+    pagination: true,
+    columnDefs: columnDefs,
+    onGridReady: (event) => { renderDataInTheTable(event.api) }
+  };
+
+  const eGridDiv = document.getElementById('data-table');
+
+  new agGrid.Grid(eGridDiv, gridOptions);
+
+  function renderDataInTheTable(api) {
+  fetch('https://api.data.gov.sg/v1/environment/2-hour-weather-forecast')
+    .then(function (response) {
+      return response.json();
+    }).then( function (data) {
+      locations = data['area_metadata'];
+      items = data['items'];
+      forecasts = items[0]['forecasts'];
+      console.log(forecasts);
+      api.setRowData(forecasts);
+      api.sizeColumnsToFit();
+    })
+  }
+</script>
+
+</body>
+</html>
