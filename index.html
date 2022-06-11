@@ -16,18 +16,24 @@
       color: rgb(16, 19, 2);
       font-family: helvetica;
     }
+    p {
+      color: rgb(64, 76, 8);
+      font-size: x-small;
+      font-family: helvetica;
+    }
     #data-table {
-      height: 800px;
+      height: 750px;
       width: 100%;
     }
   </style>  
 </head>
 
-<body>
+<body onload="init()">
 <div class="c1" align="center">
   <h3>Singapore 2-hr Forecast</h3>
+  <!-- button onclick="getLocation()">Get Current Location</button -->
+  <p id="userlocation">...</p>
 </div>
-  
 
 <div id="data-table" class="ag-theme-balham">
 </div>
@@ -68,6 +74,30 @@
       console.log(data);
     })
   }
+
+  var userx = document.getElementById('userlocation');
+
+  function showlocation(pos) {
+    const y = pos.coords.lattitude;
+    const x = pos.coords.longitutide;
+    userx.innerHTML = "Latitude: " + y + ", Longitude" + x;
+  }
+
+  function showerror(err) {
+    userx.innerHTML = "Location not available";
+  }
+
+  function init() {
+    // console.log("init(): " + navigator.geolocation);
+    // console.log("userx: " + userx);
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(showlocation, showerror);
+    } else {
+      userx.innerHTML = "Location not supported by browser";
+    }
+  }
+
 </script>
 
 </body>
