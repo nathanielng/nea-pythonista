@@ -107,8 +107,8 @@
       x = "";
       for (period of periods) {
         t = period['time'];
-        t0 = t['start'];
-        t1 = t['end'];
+        t0 = Date(t['start']);
+        t1 = Date(t['end']);
         region = period['regions'];
         central = region['central'] + " (central), ";
         east = region['east'] + " (east), ";
