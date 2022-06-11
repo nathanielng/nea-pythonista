@@ -32,6 +32,8 @@
 <div class="c1" align="center">
   <h3>Singapore 2-hr Forecast</h3>
   <!-- button onclick="getLocation()">Get Current Location</button -->
+  <p id="forecast24h"></p>
+  <p id="forecast6h"></p>
   <p id="userlocation">...</p>
 </div>
 
@@ -75,6 +77,51 @@
     })
   }
 
+  function get24h() {
+    fetch('https://api.data.gov.sg/v1/environment/24-hour-weather-forecast')
+    .then(function (response) {
+      return response.json();
+    }).then( function (data) {
+      items = data['items'][0];
+      // forecast24h.innerHTML = items;
+      // locations = data['area_metadata'];
+      // items = data['items'];
+      // forecasts = items[0]['forecasts'];
+      // api.setRowData(forecasts);
+      // api.sizeColumnsToFit();
+
+      // General Forecast
+      general = items['general'];
+      console.log(general);
+
+      humidity = general['relative_humidity']['low'] + "-" + general['relative_humidity']['high'] + "% RH";
+      temperature = general['temperature']['low'] + "-" + general['temperature']['high'] + "°C";
+      windspeed = general['wind']['speed']
+      wind = windspeed['low'] + "-" + windspeed['high'] + general['wind']['direction'];
+      forecast24h.innerHTML = general['forecast'] + ", " + temperature + ", " + humidity + ", " + wind;
+
+      // 6-hour Period Forecast
+      periods = items['periods'];
+      console.log(periods);
+
+      x = "";
+      for (period of periods) {
+        t = period['time'];
+        t0 = t['start'];
+        t1 = t['end'];
+        region = period['regions'];
+        central = region['central'] + " (central), ";
+        east = region['east'] + " (east), ";
+        north = region['north'] + " (north), ";
+        south = region['south'] + " (south), ";
+        west = region['west'] + " (west)";
+        x = x + t0 + ": " + central + east + north + south + west + "<br>";
+        console.log(period);
+      }
+      forecast6h.innerHTML = x;
+    })
+  }
+
   var userx = document.getElementById('userlocation');
 
   function showlocation(pos) {
@@ -91,8 +138,11 @@
     // console.log("init(): " + navigator.geolocation);
     // console.log("userx: " + userx);
 
+    get24h();
+
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(showlocation, showerror);
+      userx.innerHTML = "";
+      // navigator.geolocation.getCurrentPosition(showlocation, showerror);
     } else {
       userx.innerHTML = "Location not supported by browser";
     }
