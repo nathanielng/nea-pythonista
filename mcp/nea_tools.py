@@ -459,7 +459,7 @@ def demo():
     address = "Orchard Road, Singapore"
     weather = get_weather_for_singapore_address(address)
     if weather:
-        print(f"Weather for {address}: {weather['forecast']}")
+        print(f"Weather for {address}:\n" + json.dumps(weather, indent=2, default=str))
 
     # Example of using the new function to get weather for a specific address region
     address = "Changi Airport, Singapore"
@@ -471,11 +471,62 @@ def demo():
 
     # Example of using the new function to get weather for specific coordinates
     lat, lon = 1.3644, 103.9915  # Example coordinates near Changi
-    region_weather = get_weather_for_coordinates_region(lat, lon)
+    region_weather = get_weather_for_singapore_coordinates(lat, lon)
     if region_weather:
         print(f"Weather for coordinates ({lat}, {lon}) in {region_weather['region']} region:")
         for forecast in region_weather['forecasts']:
             print(f"  {forecast['timePeriod']['start']} to {forecast['timePeriod']['end']}: {forecast['forecast']}")
+
+def demo_agent():
+    SYSTEM_PROMPT_NEA = """
+    You are a helpful weather assistant that can provide weather information for Singapore.
+    You have access to tools that can fetch current weather data and forecasts, as well as geocoding for Singapore locations.
+    When providing weather information, include relevant details like temperature, conditions, etc.
+    """
+    import boto3
+    from botocore.config import Config
+    from strands import Agent
+    from strands.models.bedrock import BedrockModel
+
+
+    AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY', None)
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', None)
+    AWS_SESSION_TOKEN = os.getenv('AWS_SESSION_TOKEN', None)
+    if AWS_ACCESS_KEY and AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN:
+        session = boto3.Session(
+            aws_access_key_id=AWS_ACCESS_KEY,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            aws_session_token=AWS_SESSION_TOKEN,
+            region_name=AWS_DEFAULT_REGION
+        )
+    else:
+        session = boto3.Session()
+
+    BEDROCK_MODEL_ID = os.getenv('BEDROCK_MODEL_ID', 'us.amazon.nova-lite-v1:0')
+    model = BedrockModel(
+        model_id=BEDROCK_MODEL_ID,
+        max_tokens=2048,
+        boto_client_config=Config(
+            read_timeout=120,
+            connect_timeout=120,
+            retries=dict(max_attempts=3, mode="adaptive"),
+        ),
+        boto_session=session
+    )
+    nea_agent = Agent(
+        model = model,
+        system_prompt = SYSTEM_PROMPT_NEA,
+        tools = [ get_weather_for_singapore_address , geocode_address ]
+    )
+    example_requests = [
+        'What is the weather in Singapore? Use the NEA API',
+        'Tell me the Singapore weather forecast for the next 3 days',
+        'What is the latitude and longitude for Buona Vista, Singapore?',
+        'Convert the latitude, longitude: 1.3066, 103.7908 to an address and postal code'
+    ]
+    for example in example_requests:
+        response = nea_agent(example)
+        print(response)
 
 
 weather_data_2hr = init_or_refresh_2hr_data()
@@ -483,4 +534,5 @@ weather_data_24hr = init_or_refresh_24hr_data()
 
 
 if __name__ == '__main__':
-    demo()
+    # demo()
+    demo_agent()
