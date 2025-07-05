@@ -437,20 +437,20 @@ def get_weather_for_singapore_address(address_or_postal: str):
 
 def init_or_refresh_2hr_data():
     response = get_forecast('2hr-realtime')
-    save_json(response, '2hr-realtime.json')
+    save_json(response, 'weather-data-2hr-raw.json')
 
     weather_data_2hr = convert_weather_data(response)
-    save_json(weather_data_2hr, 'converted-weather-data.json')
+    save_json(weather_data_2hr, 'weather-data-2hr-clean.json')
 
     return weather_data_2hr
 
 
 def init_or_refresh_24hr_data():
     response_24hr = get_forecast('24hr-realtime')
-    save_json(response_24hr, '24hr-realtime.json')
+    save_json(response_24hr, 'weather-data-24hr-raw.json')
     
     weather_data_24hr = organize_weather_by_region(response_24hr)
-    save_json(weather_data_24hr, 'organized-weather-by-region.json')
+    save_json(weather_data_24hr, 'weather-data-24hr-clean.json')
 
     return weather_data_24hr
 
