@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Singapore Weather</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="weather.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header-controls">
+            <button id="theme-toggle" class="theme-toggle">🌙</button>
+        </div>
+        <h1>Singapore Weather</h1>
+        <p>Real-time weather data from NEA (National Environment Agency)</p>
+        
+        <div class="forecast-buttons">
+            <button id="btn-2hr" class="forecast-btn active">🕐 2-Hour Forecast</button>
+            <button id="btn-24hr" class="forecast-btn">📅 24-Hour Forecast</button>
+            <button id="btn-4day" class="forecast-btn">📊 4-Day Outlook</button>
+        </div>
+
+        <div id="loading" class="loading hidden">Loading weather data...</div>
+        <div id="error" class="error hidden"></div>
+
+        <div id="forecast-2hr" class="forecast-section">
+            <h2>2-Hour Weather Forecast</h2>
+            <div id="forecast-period" class="forecast-period"></div>
+            <div class="layout-toggle">
+                <button id="toggle-layout" class="toggle-btn">Standard View</button>
+                <button id="toggle-map" class="toggle-btn">Show Map</button>
+                <button id="locate-user" class="toggle-btn">📍 My Location</button>
+            </div>
+            <div id="weather-map" class="weather-map hidden"></div>
+            <div id="areas-grid" class="areas-grid"></div>
+        </div>
+
+        <div id="forecast-24hr" class="forecast-section hidden">
+            <h2>24-Hour Weather Forecast</h2>
+            <div id="general-info" class="general-info"></div>
+            <div id="regions-grid" class="regions-grid"></div>
+        </div>
+
+        <div id="forecast-4day" class="forecast-section hidden">
+            <h2>4-Day Weather Outlook</h2>
+            <div id="outlook-update" class="forecast-period"></div>
+            <div id="outlook-grid" class="outlook-grid"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="weather.js"></script>
+</body>
+</html>
